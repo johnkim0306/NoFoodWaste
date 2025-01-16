@@ -1,6 +1,38 @@
+"use client";
+
 import Image from "next/image";
+import { useState } from "react";
 
 export default function Home() {
+  const [foodItems, setFoodItems] = useState<string[]>([]);
+  const [receipt, setReceipt] = useState<File | null>(null);
+
+  const handleFoodItemChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFoodItems(e.target.value.split(","));
+  };
+
+  const handleReceiptChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setReceipt(e.target.files[0]);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (receipt) {
+      const formData = new FormData();
+      formData.append("file", receipt);
+
+      const response = await fetch("/api/analyze", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await response.json();
+      console.log(result);
+    }
+  };
+
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
@@ -12,6 +44,28 @@ export default function Home() {
           height={38}
           priority
         />
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <label>
+            List your food items (comma separated):
+            <input
+              type="text"
+              onChange={handleFoodItemChange}
+              className="border p-2 rounded"
+            />
+          </label>
+          <label>
+            Upload your grocery receipt:
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleReceiptChange}
+              className="border p-2 rounded"
+            />
+          </label>
+          <button type="submit" className="bg-blue-500 text-white p-2 rounded">
+            Submit
+          </button>
+        </form>
         <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
           <li className="mb-2">
             Get started by editing{" "}
