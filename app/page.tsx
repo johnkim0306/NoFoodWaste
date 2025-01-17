@@ -1,59 +1,23 @@
 "use client";
 
-import { useState } from "react";
-import Image from "next/image";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import UserInput from "@/components/UserInput";
+import Refrigerator from "@/components/Refrigerator";
 
 export default function Home() {
-  const [foodItems, setFoodItems] = useState<string[]>([]);
-  const [receipt, setReceipt] = useState<File | null>(null);
+  const [foodItems, setFoodItems] = useState<{ name: string; expiry: number }[]>([]);
+  const [submitted, setSubmitted] = useState(false);
+  const router = useRouter();
 
-  const handleFoodItemChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFoodItems(e.target.value.split(","));
-  };
-
-  const handleReceiptChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setReceipt(e.target.files[0]);
+  useEffect(() => {
+    if (submitted) {
+      router.push('/main');
     }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (receipt) {
-      const formData = new FormData();
-      formData.append("file", receipt);
-
-      try {
-        const response = await fetch("/api/analyze", {
-          method: "POST",
-          body: formData,
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const result = await response.json();
-        console.log(result);
-      } catch (error) {
-        console.error("Error submitting form:", error);
-      }
-    }
-  };
+  }, [submitted, router]);
 
   return (
     <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-      </main>
-
       <main className="flex min-h-screen flex-col items-center justify-between p-24">
         <section id="landing" className="max-w-4xl">
           <h1 className="text-5xl font-bold text-blue-600">
@@ -127,35 +91,10 @@ export default function Home() {
         </section>
       </main>
 
-
-    <div className="min-h-screen flex flex-col items-center justify-center">
-      <h1 className="text-2xl font-bold mb-4">Upload Grocery Receipt</h1>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <label>
-          List your food items (comma separated):
-          <input
-            type="text"
-            onChange={handleFoodItemChange}
-            className="border p-2 rounded"
-          />
-        </label>
-        <label>
-          Upload your grocery receipt:
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleReceiptChange}
-            className="border p-2 rounded"
-          />
-        </label>
-        <button
-          type="submit"
-          className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
-        >
-          Analyze
-        </button>
-      </form>
-    </div>
+      <div className="flex flex-col items-center">
+        <UserInput setFoodItems={setFoodItems} setSubmitted={setSubmitted} />
+        <Refrigerator />
+      </div>
     </div>
   );
 }
