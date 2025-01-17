@@ -1,5 +1,4 @@
-import { NextApiRequest, NextApiResponse } from 'next';
-import { IncomingForm } from 'formidable';
+import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import { promisify } from 'util';
 import { VertexAI, HarmCategory, HarmBlockThreshold } from '@google-cloud/vertexai';
@@ -39,58 +38,53 @@ const readFile = promisify(fs.readFile);
 
 export const config = {
   api: {
-    bodyParser: false,
+    bodyParser: false, // Disable the default body parser to handle file uploads
   },
 };
 
-export const POST = async (req: NextApiRequest, res: NextApiResponse) => {
-  const form = new IncomingForm();
+export async function POST(req: NextRequest) {
+  try {
+    const formData = await req.formData();
 
-  form.parse(req, async (err, fields, files) => {
-    if (err) {
-      res.status(500).json({ error: 'Error parsing the file' });
-      return;
+    const file = formData.get('file') as File;
+    if (!file) {
+      return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
     }
 
-    try {
-      const file = files.file as any;
-      if (!file) {
-        res.status(400).json({ error: 'No file uploaded' });
-        return;
-      }
+    const imageData = await file.arrayBuffer();
+    const base64Image = Buffer.from(imageData).toString('base64');
 
-      const imageData = await readFile(file.filepath);
-      const base64Image = imageData.toString('base64');
-
-      // For images, the SDK supports both Google Cloud Storage URI and base64 strings
-      const filePart = {
-        fileData: {
-          inlineData: base64Image,
-          mimeType: 'image/jpeg',
+    const request = {
+      contents: [
+        {
+          role: 'user',
+          parts: [
+            {
+              fileData: {
+                content: base64Image, // Ensure you're sending base64-encoded image
+                mimeType: file.type,
+              },
+            },
+            {
+              text: prompt,
+            },
+          ],
         },
-      };
+      ],
+    };
 
-      const textPart = { text: prompt };
-      const request = {
-        contents: [{ role: 'user', parts: [filePart, textPart] }],
-      };
-      console.log(request.contents[0].parts[1].text);
+    const response = await generativeVisionModel.generateContent(request);
 
-      // Use `generateContent` for a non-streaming response
-      const response = await generativeVisionModel.generateContent(request);
+    const fullTextResponse =
+      response.response.candidates?.[0]?.content?.parts?.[0]?.text;
 
-      const fullTextResponse =
-        response.response.candidates?.[0]?.content?.parts?.[0]?.text;
-
-      if (!fullTextResponse) {
-        res.status(500).json({ error: 'No response from the model' });
-        return;
-      }
-
-      res.status(200).json({ fullTextResponse });
-    } catch (error) {
-      console.error('Error generating content:', error);
-      res.status(500).json({ error: 'Error processing the request' });
+    if (!fullTextResponse) {
+      return NextResponse.json({ error: 'No response from the model' }, { status: 500 });
     }
-  });
-};
+
+    return NextResponse.json({ fullTextResponse }, { status: 200 });
+  } catch (error) {
+    console.error('Error processing the request:', error);
+    return NextResponse.json({ error: 'Error processing the request' }, { status: 500 });
+  }
+}
