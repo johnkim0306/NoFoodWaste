@@ -54,37 +54,19 @@ export async function POST(req: NextRequest) {
     const imageData = await file.arrayBuffer();
     const base64Image = Buffer.from(imageData).toString('base64');
 
+    const filePart = { 
+      inline_data: { data: base64Image, mimeType: 'image/jpeg' } };
+    const textPart = { text: prompt };
     const request = {
-      contents: [
-        {
-          role: 'user',
-          parts: [
-            {
-              fileData: {
-                content: base64Image, // Ensure you're sending base64-encoded image
-                mimeType: file.type,
-              },
-            },
-            {
-              text: prompt,
-            },
-          ],
-        },
-      ],
+      contents: [{ role: 'user', parts: [textPart, filePart] }],
     };
 
-    const response = await generativeVisionModel.generateContent(request);
+    const streamingResult = await generativeVisionModel.generateContentStream(request);
+    const contentResponse = await streamingResult.response;
+    const result = contentResponse.candidates[0].content.parts[0].text;
 
-    const fullTextResponse =
-      response.response.candidates?.[0]?.content?.parts?.[0]?.text;
-
-    if (!fullTextResponse) {
-      return NextResponse.json({ error: 'No response from the model' }, { status: 500 });
-    }
-
-    return NextResponse.json({ fullTextResponse }, { status: 200 });
+    return NextResponse.json({ result });
   } catch (error) {
-    console.error('Error processing the request:', error);
-    return NextResponse.json({ error: 'Error processing the request' }, { status: 500 });
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
