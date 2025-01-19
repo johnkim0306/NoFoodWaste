@@ -1,15 +1,17 @@
 "use client";
 
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useRouter } from 'next/navigation';
 import { setFoodItems } from '@/lib/features/foodItems/foodItemsSlice';
+import { RootState } from '@/lib/store';
 
 const UserInput: React.FC = () => {
   const [receipt, setReceipt] = useState<File | null>(null);
   const [manualInput, setManualInput] = useState<string>("");
   const dispatch = useDispatch();
   const router = useRouter();
+  const existingFoodItems = useSelector((state: RootState) => state.foodItems.items);
 
   const handleReceiptChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -54,7 +56,12 @@ const UserInput: React.FC = () => {
       foodItems = [...foodItems, ...manualItems];
     }
 
-    dispatch(setFoodItems(foodItems));
+    // Append new items to existing items and filter out duplicates
+    const updatedFoodItems = [...existingFoodItems, ...foodItems].filter(
+      (item, index, self) => index === self.findIndex((i) => i.name === item.name)
+    );
+
+    dispatch(setFoodItems(updatedFoodItems));
     router.push('/main');
   };
 
