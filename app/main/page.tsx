@@ -67,7 +67,7 @@ const MainPage: React.FC = () => {
               <h2 className="text-xl font-bold mb-2">Recipes</h2>
               <ul className="list-disc list-inside">
                 {recipes.map((recipe, index) => (
-                  <li key={index}>{recipe}</li>
+                  <li key={index}>{recipe.name}</li>
                 ))}
               </ul>
             </div>
