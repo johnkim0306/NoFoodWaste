@@ -5,21 +5,13 @@ import joblib
 import ast
 import sys
 import json
+import os
 
-# Load data
-data = pd.read_csv('recipes.csv')
+# Define the full path to the preprocessed data file
+data_path = os.path.join(os.path.dirname(__file__), 'preprocessed_data.pkl')
 
-print(data.columns)
-
-# Convert RecipeIngredientParts to list
-def parse_ingredients(ingredient_string):
-    try:
-        return ast.literal_eval(ingredient_string)
-    except:
-        return []
-
-# Apply to the dataset
-data['IngredientsList'] = data['RecipeIngredientParts'].apply(parse_ingredients)
+# Load preprocessed data
+data = joblib.load(data_path)
 
 # Define features of interest
 ingredients_of_interest = ['tofu', 'soy sauce', 'garlic', 'onions', 'cardamom']  # Example ingredients
@@ -63,10 +55,12 @@ def recommend_recipes(user_ingredients):
     
     recipes = []
     for _, recipe in recommended_recipes.iterrows():
-        recommended_image = recipe['Images'].split(",")[0].strip('c("').strip('"')
+        # Correctly format the image URLs
+        images = recipe['Images'].split(",")
+        recommended_image = images[0].strip('c("').strip('"')
         recipes.append({
             "name": recipe['Name'],
-            "image": recommended_image,
+            "image": recipe['Images'],
             "category": recipe['RecipeCategory'],
             "description": recipe['Description'],
             "instructions": recipe['RecipeInstructions']

@@ -5,12 +5,22 @@ interface FoodItem {
   expiry: number;
 }
 
+interface Recipe {
+  name: string;
+  image: string;
+  category: string;
+  description: string;
+  instructions: string;
+}
+
 interface FoodItemsState {
   items: FoodItem[];
+  recipes: Recipe[];
 }
 
 const initialState: FoodItemsState = {
   items: [],
+  recipes: [],
 };
 
 const foodItemsSlice = createSlice({
@@ -31,8 +41,11 @@ const foodItemsSlice = createSlice({
     removeFoodItem(state, action: PayloadAction<string>) {
       state.items = state.items.filter(item => item.name !== action.payload);
     },
+    setRecipes(state, action: PayloadAction<Recipe[]>) {
+      state.recipes = action.payload;
+    },
   },
 });
 
-export const { setFoodItems, addFoodItem, removeFoodItem } = foodItemsSlice.actions;
+export const { setFoodItems, addFoodItem, removeFoodItem, setRecipes } = foodItemsSlice.actions;
 export default foodItemsSlice.reducer;

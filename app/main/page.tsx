@@ -1,14 +1,25 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/lib/store';
+import { useRouter } from 'next/navigation';
+import { setRecipes } from '@/lib/features/foodItems/foodItemsSlice';
 import Refrigerator from "@/components/Refrigerator";
 import UserInput from "@/components/UserInput";
 
+interface Recipe {
+  name: string;
+  image: string;
+  category: string;
+  description: string;
+  instructions: string;
+}
+
 const MainPage: React.FC = () => {
   const foodItems = useSelector((state: RootState) => state.foodItems.items);
-  const [recipes, setRecipes] = useState<string[]>([]);
+  const dispatch = useDispatch();
+  const router = useRouter();
 
   const shelves = useMemo(() => {
     const newShelves = [];
@@ -20,6 +31,7 @@ const MainPage: React.FC = () => {
 
   const findRecipes = async () => {
     try {
+      console.log("findRecipes function called");
       const response = await fetch("/api/find-recipes", {
         method: "POST",
         headers: {
@@ -33,7 +45,9 @@ const MainPage: React.FC = () => {
       }
 
       const result = await response.json();
-      setRecipes(result.recipes);
+      console.log("Recipes fetched:", result.recipes);
+      dispatch(setRecipes(result.recipes));
+      router.push('/find-recipes'); // Ensure no query parameter is added
     } catch (error) {
       console.error("Error finding recipes:", error);
     }
@@ -62,16 +76,6 @@ const MainPage: React.FC = () => {
           >
             Find Recipes
           </button>
-          {recipes.length > 0 && (
-            <div className="mt-4">
-              <h2 className="text-xl font-bold mb-2">Recipes</h2>
-              <ul className="list-disc list-inside">
-                {recipes.map((recipe, index) => (
-                  <li key={index}>{recipe.name}</li>
-                ))}
-              </ul>
-            </div>
-          )}
         </div>
         <Refrigerator />
         <UserInput />
