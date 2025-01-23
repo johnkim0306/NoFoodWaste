@@ -2,6 +2,7 @@
 
 import { useSelector } from 'react-redux';
 import { RootState } from '@/lib/store';
+import RecipeCard from '@/components/RecipeCard';
 
 interface Recipe {
   name: string;
@@ -16,19 +17,20 @@ const FindRecipesPage: React.FC = () => {
 
   return (
     <div className="flex flex-col items-center">
-      <h1 className="text-3xl font-bold mb-16">Recipes</h1>
+      <h1 className="text-3xl font-bold mb-16">Top 5 Budget-Friendly Recipes</h1>
       {recipes.length > 0 ? (
-        <ul className="list-disc list-inside">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
           {recipes.map((recipe, index) => (
-            <li key={index}>
-              <h3>{recipe.name}</h3>
-              <img src={recipe.image} alt={recipe.name} className="w-24 h-24 object-cover mb-2" />
-              <p><strong>Category:</strong> {recipe.category}</p>
-              <p><strong>Description:</strong> {recipe.description}</p>
-              <p><strong>Instructions:</strong> {recipe.instructions}</p>
-            </li>
+            <RecipeCard
+              key={index}
+              name={recipe.name}
+              image={recipe.image}
+              category={recipe.category}
+              description={recipe.description}
+              instructions={recipe.instructions}
+            />
           ))}
-        </ul>
+        </div>
       ) : (
         <p>No recipes found.</p>
       )}

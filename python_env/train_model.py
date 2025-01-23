@@ -1,6 +1,4 @@
 import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
 import joblib
 import ast
 import sys
@@ -16,30 +14,9 @@ data = joblib.load(data_path)
 # Define features of interest
 ingredients_of_interest = ['tofu', 'soy sauce', 'garlic', 'onions', 'cardamom']  # Example ingredients
 
-# Create binary columns for the presence of each ingredient
-for ingredient in ingredients_of_interest:
-    data[ingredient] = data['IngredientsList'].apply(lambda x: 1 if ingredient in x else 0)
-
-# Ensure the 'RecipeCategory' column exists
-if 'RecipeCategory' not in data.columns:
-    raise KeyError("The 'RecipeCategory' column is missing from the dataset")
-
-# Handle NaN values
-data = data.dropna(subset=ingredients_of_interest + ['RecipeCategory'])
-
-# Define features and labels
-features = data[ingredients_of_interest]  # The binary features
-labels = data['RecipeCategory']  # Example target label
-
-# Split into training and testing sets
-train_data, test_data = train_test_split(data, test_size=0.2, random_state=42)
-
-# Train a model
-model = RandomForestClassifier()
-model.fit(train_data[ingredients_of_interest], train_data['RecipeCategory'])
-
-# Save the model
-joblib.dump(model, 'food_recommendation_model.pkl')
+# Load the pre-trained model
+model_path = os.path.join(os.path.dirname(__file__), 'food_recommendation_model.pkl')
+model = joblib.load(model_path)
 
 # Function to recommend recipes based on ingredients
 def recommend_recipes(user_ingredients):
@@ -56,11 +33,11 @@ def recommend_recipes(user_ingredients):
     recipes = []
     for _, recipe in recommended_recipes.iterrows():
         # Correctly format the image URLs
-        images = recipe['Images'].split(",")
-        recommended_image = images[0].strip('c("').strip('"')
+        images = recipe['Images'].strip('c("').strip('")').split('", "')
+        recommended_image = images[0] if images else ""
         recipes.append({
             "name": recipe['Name'],
-            "image": recipe['Images'],
+            "image": recommended_image,
             "category": recipe['RecipeCategory'],
             "description": recipe['Description'],
             "instructions": recipe['RecipeInstructions']
