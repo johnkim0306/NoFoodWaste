@@ -1,17 +1,17 @@
 # NoFoodWaste
 
 ## Inspiration
-Nutrition is the foundation for good mental, physical, and emotional health. What if we could intelligently leverage this fact to place individuals who have limited access to quality food sources in the best position to enable their success? I was motivated by this idea and was led to develop a web app which allowed for users to plan meals based on food inflation predictions.
+Nutrition is the foundation for good mental, physical, and emotional health. What if we could intelligently leverage this fact to place individuals who have limited access to quality food sources in the best position to enable their success? I was motivated by this idea and was led to develop a web app which allowed for users to plan meals based on food inflation predictions and reduce food waste.
 
 ## What it does
-NoFoodWaste is a meal planning tool that leverages the power of machine learning and AI to not only predict global food inflation but also create budget meals from its findings. The user is prompted to provide their country and a target date by which they want to calculate food inflation. From this input, the app uses machine learning algorithms and generative AI to create meals that consist of ingredients with the lowest inflation rates at the given target date. The tool is very scalable and has use cases for NGOs providing meal aid in developing countries or impoverished individuals, aligning with UN sustainability and finance goals.
+NoFoodWaste is a meal planning tool that leverages the power of machine learning and AI to not only predict global food inflation but also create meals from its findings to reduce food waste. The user is prompted to provide their grocery receipt. From this input, the app uses machine learning algorithms and generative AI to create meals that consist of ingredients with the lowest inflation rates at the given target date. The tool is very scalable and has use cases for NGOs providing meal aid in developing countries or impoverished individuals, aligning with UN sustainability and finance goals.
 
 ## How I built it
 I built this by leveraging many of the latest cutting-edge technologies and platforms:
 - **Frontend**: Next.js with TypeScript and Tailwind CSS
 - **Backend**: Node.js
 - **Machine Learning**: Neural networks for predicting changing food prices using a global food inflation dataset consisting of over 700,000 foods
-- **AI**: OpenAI API to create sustainable meals from the predicted ingredients
+- **AI**: Claude API to create sustainable meals from the predicted ingredients
 
 ## Challenges I ran into
 I ran into challenges transferring the data from the ML price predictor into the web app.
@@ -28,7 +28,7 @@ After this, I plan on creating new iterations to the project to ensure that it f
 - Tailwind CSS
 - Node.js
 - sklearn
-- OpenAI API
+- Claude API
 
 ## Getting Started
 
