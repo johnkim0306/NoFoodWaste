@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
     console.log("Received food items:", foodItems); // Add this line to log the received food items
 
     // Use the full path to the Python executable
-    const pythonPath = '/home/john_kim/nofoodwaste/python_env/myenv/bin/python'; // Update this path as needed
+    const pythonPath = '/home/john_kim/nofoodwaste/python_env/myenv/bin/python';
 
     // Define the full path to the Python script
     const scriptPath = path.join('/home/john_kim/nofoodwaste/python_env', 'train_model.py');

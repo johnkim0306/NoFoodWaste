@@ -17,64 +17,34 @@ export default function Home() {
   }, [submitted, router]);
 
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex min-h-screen flex-col items-center justify-between p-24">
+    <div className="grid grid-rows-[auto_1fr_auto] items-center justify-items-center min-h-screen gap-16 p-8 sm:p-20 font-[family-name:var(--font-geist-sans)]">
+      <main className="flex flex-col items-center justify-center text-center p-8 w-full">
         <section id="landing" className="max-w-4xl">
-          <h1 className="text-5xl font-bold text-blue-600">
+          <h1 className="text-5xl font-bold text-blue-600 mb-8">
             From Wallet to Plate, No Food Waste Delivers Nutritious Savings!
           </h1>
-          <div className="gap-12 grid grid-cols-3 mt-14">
-            <div
-              className="flex flex-col relative overflow-hidden height-auto text-foreground box-border bg-content1 outline-none data-[focus-visible=true]:z-10 data-[focus-visible=true]:outline-2 data-[focus-visible=true]:outline-focus data-[focus-visible=true]:outline-offset-2 shadow-medium rounded-large transition-transform-background motion-reduce:transition-none py-4"
-              tabIndex={-1}
-            >
-              <div className="flex p-3 z-10 w-full justify-start items-center shrink-0 overflow-inherit color-inherit subpixel-antialiased rounded-t-large">
-                <p className="text-4xl font-bold">
-                  <span className="text-blue-500">2.9+</span> People
-                </p>
-              </div>
-              <hr
-                className="shrink-0 bg-divider border-none w-full h-divider"
-                role="separator"
-              />
-              <div className="relative flex w-full p-3 flex-auto flex-col place-content-inherit align-items-inherit h-auto break-words text-left overflow-y-auto subpixel-antialiased">
-                <p>unable to afford a healthy diet</p>
-              </div>
+          <div className="gap-12 grid grid-cols-1 sm:grid-cols-3 mt-14">
+            <div className="flex flex-col relative overflow-hidden bg-content1 shadow-md rounded-lg p-4">
+              <p className="text-4xl font-bold mb-2">
+                <span className="text-blue-500">2.9+</span> People
+              </p>
+              <hr className="my-2 border-gray-300" />
+              <p>unable to afford a healthy diet</p>
             </div>
-            <div
-              className="flex flex-col relative overflow-hidden height-auto text-foreground box-border bg-content1 outline-none data-[focus-visible=true]:z-10 data-[focus-visible=true]:outline-2 data-[focus-visible=true]:outline-focus data-[focus-visible=true]:outline-offset-2 shadow-medium rounded-large transition-transform-background motion-reduce:transition-none py-4"
-              tabIndex={-1}
-            >
-              <div className="flex p-3 z-10 w-full justify-start items-center shrink-0 overflow-inherit color-inherit subpixel-antialiased rounded-t-large">
-                <p className="text-4xl font-bold text-blue-500">39%</p>
-              </div>
-              <hr
-                className="shrink-0 bg-divider border-none w-full h-divider"
-                role="separator"
-              />
-              <div className="relative flex w-full p-3 flex-auto flex-col place-content-inherit align-items-inherit h-auto break-words text-left overflow-y-auto subpixel-antialiased">
-                <p>increase in global food prices</p>
-              </div>
+            <div className="flex flex-col relative overflow-hidden bg-content1 shadow-md rounded-lg p-4">
+              <p className="text-4xl font-bold text-blue-500 mb-2">39%</p>
+              <hr className="my-2 border-gray-300" />
+              <p>increase in global food prices</p>
             </div>
-            <div
-              className="flex flex-col relative overflow-hidden height-auto text-foreground box-border bg-content1 outline-none data-[focus-visible=true]:z-10 data-[focus-visible=true]:outline-2 data-[focus-visible=true]:outline-focus data-[focus-visible=true]:outline-offset-2 shadow-medium rounded-large transition-transform-background motion-reduce:transition-none py-4"
-              tabIndex={-1}
-            >
-              <div className="flex p-3 z-10 w-full justify-start items-center shrink-0 overflow-inherit color-inherit subpixel-antialiased rounded-t-large">
-                <p className="text-4xl font-bold">
-                  <span className="text-blue-500">12M</span> Deaths
-                </p>
-              </div>
-              <hr
-                className="shrink-0 bg-divider border-none w-full h-divider"
-                role="separator"
-              />
-              <div className="relative flex w-full p-3 flex-auto flex-col place-content-inherit align-items-inherit h-auto break-words text-left overflow-y-auto subpixel-antialiased">
-                <p>linked to poor diet and nutrition</p>
-              </div>
+            <div className="flex flex-col relative overflow-hidden bg-content1 shadow-md rounded-lg p-4">
+              <p className="text-4xl font-bold mb-2">
+                <span className="text-blue-500">12M</span> Deaths
+              </p>
+              <hr className="my-2 border-gray-300" />
+              <p>linked to poor diet and nutrition</p>
             </div>
           </div>
-          <p className="mt-14">
+          <p className="mt-14 leading-relaxed">
             <span className="text-blue-500">No Food Waste</span> is dedicated to
             supporting individuals facing financial constraints by offering
             personalized, budget-friendly{" "}
@@ -91,8 +61,9 @@ export default function Home() {
         </section>
       </main>
 
-      <div className="flex flex-col items-center">
-        <UserInput setFoodItems={setFoodItems} setSubmitted={setSubmitted} />
+      {/* User Input and Refrigerator */}
+      <div className="flex flex-col md:flex-row items-center justify-center gap-8 p-8 bg-gray-100 rounded-lg shadow-lg">
+        <UserInput />
         <Refrigerator />
       </div>
     </div>

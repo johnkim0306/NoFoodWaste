@@ -17,7 +17,7 @@ const FindRecipesPage: React.FC = () => {
 
   return (
     <div className="flex flex-col items-center">
-      <h1 className="text-3xl font-bold mb-16">Top 5 Budget-Friendly Recipes</h1>
+      <h1 className="text-3xl font-bold mt-16 mb-16">Top 5 Budget-Friendly Recipes</h1>
       {recipes.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
           {recipes.map((recipe, index) => (

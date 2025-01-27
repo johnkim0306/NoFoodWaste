@@ -23,8 +23,8 @@ const MainPage: React.FC = () => {
 
   const shelves = useMemo(() => {
     const newShelves = [];
-    for (let i = 0; i < foodItems.length; i += 5) {
-      newShelves.push(foodItems.slice(i, i + 5).map(item => item.name));
+    for (let i = 0; i < foodItems.length; i += 4) {
+      newShelves.push(foodItems.slice(i, i + 4).map(item => item.name));
     }
     return newShelves;
   }, [foodItems]);
@@ -55,12 +55,12 @@ const MainPage: React.FC = () => {
 
   return (
     <div className="flex flex-col items-center">
-      <div className="flex flex-row items-start justify-center bg-gray-100 p-4 gap-8">
+      <div className="flex flex-row items-start justify-center bg-gray-100 p-4 gap-8 mt-16">
         <div className="shelf-container w-full p-4">
           <h1 className="text-3xl font-bold mb-16">Food Shelf</h1>
           {shelves.map((shelf, index) => (
-            <div key={index} className="shelf mb-16">
-              <div className="books grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8">
+            <div key={index} className="shelf mt-16 mb-16">
+              <div className="books grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-8">
                 {shelf.map((item, idx) => (
                   <div key={idx} className="food-item bg-green-200 p-4 m-4 rounded flex flex-col items-center">
                     <img src={`/images/${item}.jpg`} alt={item} className="w-24 h-24 object-cover mb-2" />
@@ -77,8 +77,10 @@ const MainPage: React.FC = () => {
             Find Recipes
           </button>
         </div>
-        <Refrigerator />
-        <UserInput />
+        <div className="flex flex-row items-start gap-4"> {/* Ensure flex-direction is row and add gap */}
+          <UserInput />
+          <Refrigerator />
+        </div>
       </div>
     </div>
   );
