@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs';
 import { promisify } from 'util';
+import { redis } from "@/lib/redis";
 import { VertexAI, HarmCategory, HarmBlockThreshold } from '@google-cloud/vertexai';
 
 const PROJECT_ID = "nofoodwaste-448015";
@@ -42,11 +43,34 @@ export const config = {
   },
 };
 
+// Rate Limit Configuration
+const MAX_REQUESTS = 1;
+const WINDOW_SECONDS = 60; 
+
+async function isRateLimited(ip: string): Promise<boolean> {
+  const cacheKey = `rate-limit:${ip}`;
+  const requests = await redis.incr(cacheKey);
+
+  console.log(`IP ${ip} has made ${requests} requests`); // Debugging Log
+
+  if (requests === 1) {
+    await redis.expire(cacheKey, WINDOW_SECONDS); // Expire the key after 60 seconds
+  }
+
+  return requests > MAX_REQUESTS;
+}
+
 export async function POST(req: NextRequest) {
   try {
-    const formData = await req.formData();
+    const ip = req.headers.get("x-forwarded-for") || "unknown-ip";
 
+    if (await isRateLimited(ip)) {
+      return NextResponse.json({ error: "Too many requests. Please wait." }, { status: 429 });
+    }
+
+    const formData = await req.formData();
     const file = formData.get('file') as File;
+
     if (!file) {
       return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
     }
