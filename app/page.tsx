@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import UserInput from "@/components/UserInput";
 import Refrigerator from "@/components/Refrigerator";
+import ReactQueryProvider from "@/components/ReactQueryProvider";
 
 export default function Home() {
   const [foodItems, setFoodItems] = useState<{ name: string; expiry: number }[]>([]);
@@ -63,7 +64,9 @@ export default function Home() {
 
       {/* User Input and Refrigerator */}
       <div className="flex flex-col md:flex-row items-center justify-center gap-8 p-8 rounded-lg shadow-lg">
-        <UserInput />
+        <ReactQueryProvider>
+            <UserInput />
+        </ReactQueryProvider>
         <Refrigerator />
       </div>
     </div>

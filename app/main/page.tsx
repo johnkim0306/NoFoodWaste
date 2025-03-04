@@ -1,12 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useEffect } from "react";
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/lib/store';
 import { useRouter } from 'next/navigation';
 import { setRecipes } from '@/lib/features/foodItems/foodItemsSlice';
 import Refrigerator from "@/components/Refrigerator";
 import UserInput from "@/components/UserInput";
+import { useQuery } from '@tanstack/react-query';
 
 interface Recipe {
   name: string;
@@ -15,6 +16,24 @@ interface Recipe {
   description: string;
   instructions: string;
 }
+
+const fetchRecipes = async (foodItems: string[]): Promise<Recipe[]> => {
+  const response = await fetch("/api/find-recipes", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ foodItems }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  const result = await response.json();
+  console.log("API Response:", result);
+  return result.recipes;
+};
 
 const MainPage: React.FC = () => {
   const foodItems = useSelector((state: RootState) => state.foodItems.items);
@@ -29,29 +48,34 @@ const MainPage: React.FC = () => {
     return newShelves;
   }, [foodItems]);
 
-  const findRecipes = async () => {
-    try {
-      console.log("findRecipes function called");
-      const response = await fetch("/api/find-recipes", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ foodItems }),
-      });
+  const { data: recipes, error, isLoading, refetch } = useQuery({
+    queryKey: ['recipes', foodItems.join(',')], 
+    queryFn: () => fetchRecipes(foodItems.map(item => item.name)),  
+    enabled: false, // Disable automatic fetching
+  });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      console.log("Recipes fetched:", result.recipes);
-      dispatch(setRecipes(result.recipes));
-      router.push('/find-recipes'); // Ensure no query parameter is added
-    } catch (error) {
-      console.error("Error finding recipes:", error);
+  // Handle side effects after the query succeeds
+  useEffect(() => {
+    if (recipes) {
+      console.log("Recipes fetched successfully. Storing in Redux...");
+      dispatch(setRecipes(recipes)); // Store recipes in Redux
+      console.log("Recipes stored in Redux. Navigating to /find-recipes...");
+      router.push('/find-recipes'); // Navigate to /find-recipes
     }
+  }, [recipes, dispatch, router]);
+
+  const handleFindRecipes = () => {
+    console.log("Find Recipes button clicked. Fetching recipes...");
+    refetch(); // Manually trigger the query
   };
+
+  if (isLoading) return <div>Loading...</div>;
+  if (error) return (
+    <div>
+      Error fetching recipes: {error.message}
+      <button onClick={() => refetch()}>Retry</button>
+    </div>
+  );
 
   return (
     <div className="flex flex-col items-center">
@@ -71,13 +95,15 @@ const MainPage: React.FC = () => {
             </div>
           ))}
           <button
-            onClick={findRecipes}
+            onClick={handleFindRecipes}
             className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mt-4"
+            disabled={foodItems.length === 0}
+            title={foodItems.length === 0 ? "Add food items to find recipes" : ""}
           >
             Find Recipes
           </button>
         </div>
-        <div className="flex flex-row items-start gap-4"> {/* Ensure flex-direction is row and add gap */}
+        <div className="flex flex-row items-start gap-4">
           <UserInput />
           <Refrigerator />
         </div>

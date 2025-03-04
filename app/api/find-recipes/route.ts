@@ -44,9 +44,8 @@ export async function POST(req: NextRequest) {
 
     if (cachedResponse) {
       try {
-        const parsedResponse = JSON.parse(cachedResponse);
         console.log("Cache hit ✅ Returning cached recipes");
-        return NextResponse.json(parsedResponse);
+        return NextResponse.json(cachedResponse);
       } catch (error) {
         console.error("Error parsing cached response:", error);
         return NextResponse.json({ error: "Invalid cached data" }, { status: 500 });
