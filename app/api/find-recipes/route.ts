@@ -3,10 +3,10 @@ import { spawn } from 'child_process';
 import path from 'path';
 import { redis } from "@/lib/redis";
 
-
 // Rate Limit Configuration
-const MAX_REQUESTS = 1;
+const MAX_REQUESTS = 3;
 const WINDOW_SECONDS = 60; 
+const CACHE_EXPIRY_SECONDS = 3600;
 
 async function isRateLimited(ip: string): Promise<boolean> {
   const cacheKey = `rate-limit:${ip}`;
@@ -14,7 +14,7 @@ async function isRateLimited(ip: string): Promise<boolean> {
 
   console.log(`IP ${ip} has made ${requests} requests`);
   if (requests === 1) {
-    await redis.expire(cacheKey, WINDOW_SECONDS); // Expire the key after 60 seconds
+    await redis.expire(cacheKey, WINDOW_SECONDS);
   }
 
   return requests > MAX_REQUESTS;
@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     const ip = req.headers.get("x-forwarded-for") || "unknown-ip";
 
     if (await isRateLimited(ip)) {
-      const ttl = await redis.ttl(`rate-limit:${ip}`); // Get time left in seconds
+      const ttl = await redis.ttl(`rate-limit:${ip}`);
       return NextResponse.json(
         { 
           message: `You're sending too many requests! Please wait ${ttl} seconds before trying again.`,
@@ -39,13 +39,24 @@ export async function POST(req: NextRequest) {
     const { foodItems } = await req.json();
     console.log("Received food items:", foodItems);
 
-    // Use the full path to the Python executable
+    const cacheKey = `recipes:${JSON.stringify(foodItems)}`;
+    const cachedResponse = await redis.get(cacheKey);
+
+    if (cachedResponse) {
+      try {
+        const parsedResponse = JSON.parse(cachedResponse);
+        console.log("Cache hit ✅ Returning cached recipes");
+        return NextResponse.json(parsedResponse);
+      } catch (error) {
+        console.error("Error parsing cached response:", error);
+        return NextResponse.json({ error: "Invalid cached data" }, { status: 500 });
+      }
+    } else {
+      console.log("Cache miss ❌ Running recipe model...");
+    }
+
     const pythonPath = '/home/john_kim/nofoodwaste/python_env/myenv/bin/python';
-
-    // Define the full path to the Python script
     const scriptPath = path.join('/home/john_kim/nofoodwaste/python_env', 'train_model.py');
-
-    // Call the Python script
     const pythonProcess = spawn(pythonPath, [scriptPath, JSON.stringify(foodItems)]);
 
     let result = '';
@@ -58,10 +69,14 @@ export async function POST(req: NextRequest) {
     });
 
     return new Promise((resolve, reject) => {
-      pythonProcess.on('close', (code) => {
-        if (code !== 0) {
+      pythonProcess.on('close', async (code) => {
+        if (code !== 0 || !result) {
+          console.error(`[${new Date().toISOString()}] ❌ Python script failed or returned no data.`);
           reject(new Error('Python script failed'));
         } else {
+          console.log("Model execution successful ✅ Caching result...");
+          const resultString = typeof result === 'string' ? result : JSON.stringify(result);
+          await redis.setex(cacheKey, CACHE_EXPIRY_SECONDS, resultString);
           resolve(NextResponse.json(JSON.parse(result)));
         }
       });

@@ -62,7 +62,7 @@ export default function Home() {
       </main>
 
       {/* User Input and Refrigerator */}
-      <div className="flex flex-col md:flex-row items-center justify-center gap-8 p-8 bg-gray-100 rounded-lg shadow-lg">
+      <div className="flex flex-col md:flex-row items-center justify-center gap-8 p-8 rounded-lg shadow-lg">
         <UserInput />
         <Refrigerator />
       </div>
